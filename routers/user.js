@@ -28,6 +28,9 @@ async function run() {
     const reviewCollection = client
       .db("computerAccessories")
       .collection("reviews");
+    const purchaseCollection = client
+      .db("computerAccessories")
+      .collection("purchases");
 
     // User default
     router
@@ -75,6 +78,32 @@ async function run() {
 
       res.send(result);
     });
+
+    // Add purchase
+    router.route("/purchase").post(async (req, res) => {
+      const result = await purchaseCollection.insertOne(req.body);
+
+      res.send(result);
+    });
+
+    router
+      .route("/purchases/:id")
+      .get(async (req, res) => {
+        const { id } = req.params;
+
+        const result = await purchaseCollection.find({ email: id }).toArray();
+
+        res.send(result);
+      })
+      .delete(async (req, res) => {
+        const { id } = req.params;
+
+        const result = await purchaseCollection.deleteOne({
+          _id: ObjectId(id),
+        });
+
+        res.send(result);
+      });
   } finally {
     // await client.close();
   }
