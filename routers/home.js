@@ -32,10 +32,11 @@ async function run() {
 
     // get all accessories
     router.get("/accessories", async (req, res) => {
-      const accessories = await accessoryCollection.find().toArray();
+      const accessories = await accessoryCollection.find().limit(6).toArray();
       res.send(accessories);
     });
 
+    // get a accessory by id
     router.get("/accessories/:id", async (req, res) => {
       const { id } = req.params;
 
@@ -47,6 +48,13 @@ async function run() {
 
       // send data
       res.send(accessory);
+    });
+
+    // post a accessories
+    router.post("/accessories", async (req, res) => {
+      const result = await accessoryCollection.insertOne(req.body);
+
+      res.send(result);
     });
 
     // Get all review

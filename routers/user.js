@@ -35,11 +35,15 @@ async function run() {
     // User default
     router
       .route("/")
-      .get(function (req, res) {
-        res.json(req.user);
+      .get(async (req, res) => {
+        const { user } = req.query;
+
+        const result = await userCollection.findOne({ email: user });
+
+        res.send(result);
       })
       .put(async (req, res) => {
-        const { name, email } = req.body;
+        const { email } = req.body;
 
         const filter = {
           email,
@@ -50,7 +54,7 @@ async function run() {
         };
 
         const updateDoc = {
-          $set: { name, email },
+          $set: req.body,
         };
 
         const result = await userCollection.updateOne(
