@@ -50,6 +50,20 @@ async function run() {
       res.send(accessory);
     });
 
+    // get a accessory by id
+    router.delete("/accessories/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const query = {
+        _id: ObjectId(id),
+      };
+
+      const response = await accessoryCollection.deleteOne(query);
+
+      // send data
+      res.send(response);
+    });
+
     // post a accessories
     router.post("/accessories", async (req, res) => {
       const result = await accessoryCollection.insertOne(req.body);
