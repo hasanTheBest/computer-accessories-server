@@ -68,17 +68,18 @@ async function run() {
         });
 
         res.send({ result, token });
-      })
-      .post(function (req, res, next) {
-        next(new Error("not implemented"));
-      })
-      .delete(function (req, res, next) {
-        next(new Error("not implemented"));
       });
 
     // Add review
     router.route("/review").post(async (req, res) => {
       const result = await reviewCollection.insertOne(req.body);
+
+      res.send(result);
+    });
+
+    // Get all purchases
+    router.route("/purchases").get(async (req, res) => {
+      const result = await purchaseCollection.find().toArray();
 
       res.send(result);
     });
