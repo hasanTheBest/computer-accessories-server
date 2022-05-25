@@ -109,6 +109,19 @@ async function run() {
       res.send(result);
     });
 
+    // Get a purchase by id
+    router.route("/purchase/:id").get(async (req, res) => {
+      const { id } = req.params;
+
+      const query = {
+        _id: ObjectId(id),
+      };
+
+      const result = await purchaseCollection.findOne(query);
+
+      res.send(result);
+    });
+
     // Add purchase
     router.route("/purchase").post(async (req, res) => {
       const result = await purchaseCollection.insertOne(req.body);
@@ -116,6 +129,7 @@ async function run() {
       res.send(result);
     });
 
+    // Get purchase by user
     router
       .route("/purchases/:id")
       .get(async (req, res) => {
