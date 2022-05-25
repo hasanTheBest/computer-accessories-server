@@ -70,6 +70,31 @@ async function run() {
         res.send({ result, token });
       });
 
+    // update user by id
+    router.route("/makeAdmin").put(async (req, res) => {
+      const { id } = req.body;
+
+      const filter = {
+        _id: ObjectId(id),
+      };
+
+      const updateDoc = {
+        $set: { role: "admin" },
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      res.send(result);
+    });
+
+    // Get all users
+    router.route("/all").get(async (req, res) => {
+      console.log("user/all");
+      const users = await userCollection.find().toArray();
+
+      res.send(users);
+    });
+
     // Add review
     router.route("/review").post(async (req, res) => {
       const result = await reviewCollection.insertOne(req.body);
