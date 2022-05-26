@@ -16,10 +16,9 @@ const client = new MongoClient(uri, {
 });
 
 // Verify valid users
-function verifyToken(req, res, next) {
-  const token = req.headers.authorization;
-
+function verifyUser(req, res, next) {
   console.log("header", req.headers);
+  const token = req.headers.authorization;
 
   if (!token) {
     return res.status(401).send({ message: "UnAuthorized access" });
@@ -98,7 +97,7 @@ async function run() {
     });
 
     // the admin make a user admin
-    router.put("/makeAdmin", verifyToken, verifyAdmin, async (req, res) => {
+    router.put("/makeAdmin", verifyUser, verifyAdmin, async (req, res) => {
       const { id } = req.body;
 
       const filter = {
