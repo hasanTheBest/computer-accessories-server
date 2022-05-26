@@ -20,7 +20,6 @@ function verifyToken(req, res, next) {
   const token = req.headers.authorization;
 
   console.log("header", req.headers);
-  console.log("token", token);
 
   if (!token) {
     return res.status(401).send({ message: "UnAuthorized access" });
@@ -33,6 +32,7 @@ function verifyToken(req, res, next) {
     }
     req.decoded = decoded;
     next();
+    console.log("token verified");
   });
 }
 
@@ -53,8 +53,10 @@ async function run() {
     // Verify admin
     const verifyAdmin = async (req, res, next) => {
       const { email } = req.decoded;
+      console.log("verifyAdmin", email);
       const userInDb = await userCollection.findOne({ email });
       if (userInDb.role === "admin") {
+        console.log("verifiedAdmin");
         next();
       } else {
         res.status(403).send({ message: "forbidden" });
@@ -102,7 +104,7 @@ async function run() {
     // update user by id
     router
       .route("/makeAdmin")
-      .put(verifyUser, verifyAdmin, async (req, res) => {
+      .put(verifyToken, verifyAdmin, async (req, res) => {
         const { id } = req.body;
 
         const filter = {
