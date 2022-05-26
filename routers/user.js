@@ -99,7 +99,7 @@ async function run() {
     });
 
     // the admin make a user admin
-    router.put("/makeAdmin", verifyUser, verifyAdmin, async (req, res) => {
+    router.put("/makeAdmin", verifyUser, async (req, res) => {
       const { id } = req.body;
 
       const filter = {
