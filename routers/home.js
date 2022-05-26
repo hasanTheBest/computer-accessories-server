@@ -1,10 +1,18 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const router = express.Router();
+// const stripe = require("stripe")(process.env.STRIPE_CLIENT_SECRET);
 
 /**
  * DB Connection
  * */
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wlxry.mongodb.net/?retryWrites=true&w=majority`;
+// const client = new MongoClient(uri, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   serverApi: ServerApiVersion.v1,
+// });
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wlxry.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -15,6 +23,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    console.log("db is connected");
 
     // Collections
     const accessoryCollection = client
@@ -75,6 +84,26 @@ async function run() {
     router.get("/reviews", async (req, res) => {
       const reviews = await reviewCollection.find().toArray();
       res.send(reviews);
+    });
+
+    // post payment
+    router.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseFloat(price) * 100;
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: parseInt(amount),
+        currency: "usd",
+        payment_method_types: ["card"],
+        // automatic_payment_methods: {
+        //   enabled: true,
+        // }, // With automatic_payment_methods enabled, Stripe automatically detects the payment methods relevant to your customer
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
   } finally {
     // await client.close();
