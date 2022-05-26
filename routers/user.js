@@ -90,6 +90,14 @@ async function run() {
       res.send(result);
     });
 
+    // get a user by email
+    router.route("user/:email").get(async (req, res) => {
+      const { email } = req.params;
+      const user = await userCollection.findOne({ email });
+
+      res.send(user);
+    });
+
     // Get all users
     router.route("/all").get(async (req, res) => {
       console.log("user/all");
