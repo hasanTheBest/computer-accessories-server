@@ -1,18 +1,11 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const router = express.Router();
-// const stripe = require("stripe")(process.env.STRIPE_CLIENT_SECRET);
+const stripe = require("stripe")(process.env.STRIPE_CLIENT_SECRET);
 
 /**
  * DB Connection
  * */
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wlxry.mongodb.net/?retryWrites=true&w=majority`;
-// const client = new MongoClient(uri, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   serverApi: ServerApiVersion.v1,
-// });
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wlxry.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,

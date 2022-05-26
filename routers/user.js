@@ -31,6 +31,9 @@ async function run() {
     const purchaseCollection = client
       .db("computerAccessories")
       .collection("purchases");
+    const paymentCollection = client
+      .db("computerAccessories")
+      .collection("payments");
 
     // User default
     router
@@ -118,6 +121,28 @@ async function run() {
       };
 
       const result = await purchaseCollection.findOne(query);
+
+      res.send(result);
+    });
+
+    // add payment data to purchase
+    router.route("/purchase/:id").put(async (req, res) => {
+      const { id } = req.params;
+      const payment = req.body;
+
+      const query = {
+        _id: ObjectId(id),
+      };
+
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+
+      const result = await purchaseCollection.updateOne(query, updateDoc);
+      const addPayment = await paymentCollection.insertOne(payment);
 
       res.send(result);
     });
