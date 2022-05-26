@@ -63,65 +63,59 @@ async function run() {
       }
     };
 
-    // User default
-    router
-      .route("/")
-      .get(verifyUser, async (req, res) => {
-        const { user } = req.query;
+    // get user by email
+    router.get("/", verifyUser, async (req, res) => {
+      const { user } = req.query;
 
-        const result = await userCollection.findOne({ email: user });
+      const result = await userCollection.findOne({ email: user });
 
-        res.send(result);
-      })
-      .put(async (req, res) => {
-        const { email } = req.body;
+      res.send(result);
+    });
 
-        const filter = {
-          email,
-        };
+    // update user with name and email
+    router.put("/", async (req, res) => {
+      const { email } = req.body;
 
-        const options = {
-          upsert: true,
-        };
+      const filter = {
+        email,
+      };
 
-        const updateDoc = {
-          $set: req.body,
-        };
+      const options = {
+        upsert: true,
+      };
 
-        const result = await userCollection.updateOne(
-          filter,
-          updateDoc,
-          options
-        );
+      const updateDoc = {
+        $set: req.body,
+      };
 
-        const token = jwt.sign({ email }, process.env.TOKEN_SECRET, {
-          expiresIn: "5h",
-        });
+      const result = await userCollection.updateOne(filter, updateDoc, options);
 
-        res.send({ result, token });
+      const token = jwt.sign({ email }, process.env.TOKEN_SECRET, {
+        expiresIn: "5h",
       });
 
-    // update user by id
-    router
-      .route("/makeAdmin")
-      .put(verifyToken, verifyAdmin, async (req, res) => {
-        const { id } = req.body;
+      res.send({ result, token });
+    });
 
-        const filter = {
-          _id: ObjectId(id),
-        };
+    // the admin make a user admin
+    router.put("/makeAdmin", verifyToken, verifyAdmin, async (req, res) => {
+      const { id } = req.body;
 
-        const updateDoc = {
-          $set: { role: "admin" },
-        };
+      const filter = {
+        _id: ObjectId(id),
+      };
 
-        const result = await userCollection.updateOne(filter, updateDoc);
+      const updateDoc = {
+        $set: { role: "admin" },
+      };
 
-        res.send(result);
-      });
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      res.send(result);
+    });
 
     // Get all users
-    router.route("/all").get(async (req, res) => {
+    router.get("/all", async (req, res) => {
       console.log("user/all");
       const users = await userCollection.find().toArray();
 
@@ -129,21 +123,21 @@ async function run() {
     });
 
     // Add review
-    router.route("/review").post(async (req, res) => {
+    router.post("/review", async (req, res) => {
       const result = await reviewCollection.insertOne(req.body);
 
       res.send(result);
     });
 
     // Get all purchases
-    router.route("/purchases").get(async (req, res) => {
+    router.get("/purchases", async (req, res) => {
       const result = await purchaseCollection.find().toArray();
 
       res.send(result);
     });
 
     // Get a purchase by id
-    router.route("/purchase/:id").get(async (req, res) => {
+    router.get("/purchase/:id", async (req, res) => {
       const { id } = req.params;
 
       const query = {
@@ -156,7 +150,7 @@ async function run() {
     });
 
     // add payment data to purchase
-    router.route("/purchase/:id").put(async (req, res) => {
+    router.put("/purchase/:id", async (req, res) => {
       const { id } = req.params;
       const payment = req.body;
 
@@ -178,31 +172,31 @@ async function run() {
     });
 
     // Add purchase
-    router.route("/purchase").post(async (req, res) => {
+    router.post("/purchase", async (req, res) => {
       const result = await purchaseCollection.insertOne(req.body);
 
       res.send(result);
     });
 
     // Get purchase by user
-    router
-      .route("/purchases/:id")
-      .get(async (req, res) => {
-        const { id } = req.params;
+    router.get("/purchases/:id", async (req, res) => {
+      const { id } = req.params;
 
-        const result = await purchaseCollection.find({ email: id }).toArray();
+      const result = await purchaseCollection.find({ email: id }).toArray();
 
-        res.send(result);
-      })
-      .delete(async (req, res) => {
-        const { id } = req.params;
+      res.send(result);
+    });
 
-        const result = await purchaseCollection.deleteOne({
-          _id: ObjectId(id),
-        });
+    // Delete order by user
+    router.delete("/purchases/:id", async (req, res) => {
+      const { id } = req.params;
 
-        res.send(result);
+      const result = await purchaseCollection.deleteOne({
+        _id: ObjectId(id),
       });
+
+      res.send(result);
+    });
   } finally {
     // await client.close();
   }
