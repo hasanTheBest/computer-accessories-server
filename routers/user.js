@@ -93,6 +93,7 @@ async function run() {
     // get a user by email
     router.route("user/:email").get(async (req, res) => {
       const { email } = req.params;
+      console.log(email);
       const user = await userCollection.findOne({ email });
 
       res.send(user);
