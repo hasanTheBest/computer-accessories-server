@@ -5,12 +5,6 @@ const router = express.Router();
 
 router.use(express.json());
 
-// middleware that is specific to this router
-/* router.use((req, res, next) => {
-  console.log('Time: ', Date.now())
-  next()
-}) */
-
 /**
  * DB Connection
  * */
@@ -20,6 +14,27 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+// Verify valid users
+function verifyToken(req, res, next) {
+  const token = req.headers.authorization;
+
+  console.log("header", req.headers);
+  console.log("token", token);
+
+  if (!token) {
+    return res.status(401).send({ message: "UnAuthorized access" });
+  }
+
+  // verify token
+  jwt.verify(token, process.env.TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 
 async function run() {
   try {
@@ -35,10 +50,21 @@ async function run() {
       .db("computerAccessories")
       .collection("payments");
 
+    // Verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const { email } = req.decoded;
+      const userInDb = await userCollection.findOne({ email });
+      if (userInDb.role === "admin") {
+        next();
+      } else {
+        res.status(403).send({ message: "forbidden" });
+      }
+    };
+
     // User default
     router
       .route("/")
-      .get(async (req, res) => {
+      .get(verifyUser, async (req, res) => {
         const { user } = req.query;
 
         const result = await userCollection.findOne({ email: user });
@@ -74,34 +100,23 @@ async function run() {
       });
 
     // update user by id
-    router.route("/makeAdmin").put(async (req, res) => {
-      const { id } = req.body;
+    router
+      .route("/makeAdmin")
+      .put(verifyUser, verifyAdmin, async (req, res) => {
+        const { id } = req.body;
 
-      const filter = {
-        _id: ObjectId(id),
-      };
+        const filter = {
+          _id: ObjectId(id),
+        };
 
-      const updateDoc = {
-        $set: { role: "admin" },
-      };
+        const updateDoc = {
+          $set: { role: "admin" },
+        };
 
-      const result = await userCollection.updateOne(filter, updateDoc);
+        const result = await userCollection.updateOne(filter, updateDoc);
 
-      res.send(result);
-    });
-
-    // get a user by email
-    router.route("/user/:id").get(async (req, res) => {
-      const { id } = req.params;
-
-      const query = {
-        email: id,
-      };
-
-      const result = await userCollection.findOne(query);
-
-      res.send(result);
-    });
+        res.send(result);
+      });
 
     // Get all users
     router.route("/all").get(async (req, res) => {
