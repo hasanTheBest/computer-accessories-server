@@ -65,7 +65,7 @@ async function run() {
     };
 
     // get user by email
-    router.get("/", verifyUser, async (req, res) => {
+    router.get("/", async (req, res) => {
       const { user } = req.query;
 
       const result = await userCollection.findOne({ email: user });
@@ -99,7 +99,7 @@ async function run() {
     });
 
     // the admin make a user admin
-    router.put("/makeAdmin", verifyUser, async (req, res) => {
+    router.put("/makeAdmin", async (req, res) => {
       const { id } = req.body;
 
       const filter = {
