@@ -17,8 +17,10 @@ const client = new MongoClient(uri, {
 
 // Verify valid users
 function verifyUser(req, res, next) {
-  console.log("header", req.headers);
   const token = req.headers.authorization;
+
+  console.log("token", token);
+  console.log("process", process.env.TOKEN_SECRET);
 
   if (!token) {
     return res.status(401).send({ message: "UnAuthorized access" });
